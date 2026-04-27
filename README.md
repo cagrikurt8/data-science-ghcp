@@ -9,7 +9,7 @@
 
 ## 🎯 Workshop Sonunda Katılımcılar Şunları Yapabilecek
 
-- GitHub Copilot'u **veri bilimi iş akışına** özelleştirme (workspace-level instructions, prompt files, chat modes).
+- GitHub Copilot'u **veri bilimi iş akışına** özelleştirme (workspace-level instructions, prompt files, custom agents).
 - **Rol bazlı custom agent** tanımlama (`.github/agents/*.agent.md`).
 - Bir veri setini yükleyip **Data Analyzer agent** ile keşifsel analiz (EDA) yapma.
 - **Feature Engineer agent** ile özellik mühendisliği pipeline'ı üretme.
@@ -26,7 +26,7 @@
 |------|------|------|
 | 0 | 10 dk | Giriş + Ortam kontrolü |
 | 1 | 25 dk | GitHub Copilot'u Veri Bilimi için Özelleştirme |
-| 2 | 25 dk | Custom Agent Mimarisi (Chat Modes + Prompt Files) |
+| 2 | 25 dk | Custom Agent Mimarisi (Custom Agents + Prompt Files) |
 | 3 | 25 dk | **Lab 1 — Data Analyzer Agent** (EDA) |
 | 4 | 10 dk | ☕ Mola |
 | 5 | 25 dk | **Lab 2 — Feature Engineer Agent** |
