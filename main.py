@@ -1,5 +1,5 @@
 def main():
-    print("Hello from data-science-gh!")
+    print("Hello from data-science-ghcp!")
 
 
 if __name__ == "__main__":
