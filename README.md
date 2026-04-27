@@ -430,16 +430,6 @@ data-science-gh/
 
 ---
 
-## 🎓 Pedagojik İpuçları (Eğitmen için)
-
-- **Her lab'ı 3 aşamada işle:** (1) prompt'u canlı yaz, (2) agent'ı çalıştır, (3) çıktıyı eleştirel incele.
-- **"Kötü prompt → iyi prompt"** karşılaştırması yap: aynı görevi önce muğlak, sonra kısıtlı iste.
-- Katılımcılara **"agent'ı kır"** görevi ver: hangi prompt agent'ı role dışına çıkarır? → guardrail tartışması.
-- Her blok sonunda **2 dk "ne öğrendik?"** mini retrospektifi.
-- Çıktıları repo'ya **commit** ettir → Copilot Code Review ile PR demosu.
-
----
-
 ## ✅ Başarı Kriterleri (Katılımcı Checklist)
 
 - [ ] `.github/agents/` altında en az 3 çalışan custom agent
