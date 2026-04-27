@@ -1,5 +1,5 @@
 ---
-mode: agent
+name: eda-summary-report
 description: Verilen DataFrame için standart EDA özet raporu üretir
 ---
 Verilen pandas DataFrame için şunları yap:
