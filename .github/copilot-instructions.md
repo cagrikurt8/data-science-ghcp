@@ -1,6 +1,6 @@
 # Proje Bağlamı
 Bu repo, bankacılık müşteri davranışı üzerine ikili sınıflandırma modelleri geliştirir.
-- Dil: Python 3.11, Pandas, scikit-learn, XGBoost, MLflow
+- Dil: Python 3.12, Pandas, scikit-learn, XGBoost, MLflow
 - Paket yöneticisi: **uv** — bağımlılık ekleme `uv add <paket>`, çalıştırma `uv run <komut>`
 - Bağımlılıklar `pyproject.toml`'da; `uv.lock` commit'lenir; `pip install` / `requirements.txt` KULLANMA
 - Kod stili: PEP8, `ruff` ile lint, tip ipuçları zorunlu
