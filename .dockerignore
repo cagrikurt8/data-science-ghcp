@@ -1,0 +1,16 @@
+.venv
+.git
+.github
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+mlruns
+notebooks
+reports
+data
+deploy
+scoring
+.vscode
+*.md
+README.md

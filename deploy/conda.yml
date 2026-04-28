@@ -1,0 +1,18 @@
+name: bank-churn-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - fastapi>=0.115
+      - uvicorn[standard]>=0.30
+      - pydantic>=2.7
+      - scikit-learn>=1.8
+      - xgboost>=3.2
+      - pandas>=2.2
+      - numpy>=2.0
+      - joblib>=1.4
+      - pyarrow>=15
+      - azureml-inference-server-http
+      - azureml-defaults

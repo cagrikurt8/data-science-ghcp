@@ -43,7 +43,6 @@ DERIVED_NUMERIC = [
     "has_balance",
     "balance_to_salary",
     "products_per_tenure",
-    "is_senior",
 ]
 
 
@@ -60,7 +59,9 @@ class DerivedFeatures(BaseEstimator, TransformerMixin):
     - has_balance: Balance > 0 (Data Analyzer R4)
     - balance_to_salary: Balance / (EstimatedSalary + 1)
     - products_per_tenure: NumOfProducts / (Tenure + 1)
-    - is_senior: Age >= 60 (Data Analyzer R6 - sag carpik yas dagilimi)
+
+    NOT: `is_senior` ozelligi v1 evaluation'da age_bucket fairness FAIL'ine
+    katki yaptigi icin v2'de kaldirildi.
     """
 
     def fit(self, X: pd.DataFrame, y=None):  # noqa: D401, N803
@@ -71,7 +72,6 @@ class DerivedFeatures(BaseEstimator, TransformerMixin):
         X["has_balance"] = (X["Balance"] > 0).astype(int)
         X["balance_to_salary"] = X["Balance"] / (X["EstimatedSalary"] + 1.0)
         X["products_per_tenure"] = X["NumOfProducts"] / (X["Tenure"] + 1.0)
-        X["is_senior"] = (X["Age"] >= 60).astype(int)
         return X
 
 

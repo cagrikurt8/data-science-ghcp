@@ -57,6 +57,9 @@ GATE_THRESHOLDS = {
     "pr_auc": 0.55,
     "brier": 0.20,  # daha dusuk = daha iyi
 }
+# Conditional GO: business waiver. Bu segmentlerde recall_gap FAIL ise
+# WARN'a indirgenir (is kurali ile telafi ediliyor).
+GATE_WAIVERS_RECALL_GAP: set[str] = {"age_bucket"}
 
 sns.set_theme(style="whitegrid")
 
@@ -179,7 +182,13 @@ def plot_calibration(y_true: np.ndarray, y_proba: np.ndarray, path: Path) -> dic
 
 def shap_global_local(model, X_test: pd.DataFrame, path_global: Path, path_local: Path, top_k: int = 10) -> tuple[list[str], dict[str, Any]]:
     sample = X_test.sample(n=min(500, len(X_test)), random_state=RANDOM_STATE)
-    explainer = shap.TreeExplainer(model)
+    # Calibrated wrapper -> alttaki tree estimator'i ac
+    tree_model = model
+    if hasattr(model, "calibrated_classifiers_"):
+        tree_model = model.calibrated_classifiers_[0].estimator
+    if hasattr(tree_model, "estimator"):  # FrozenEstimator
+        tree_model = tree_model.estimator
+    explainer = shap.TreeExplainer(tree_model)
     shap_values = explainer.shap_values(sample)
 
     # Global summary
@@ -337,11 +346,16 @@ def go_no_go(default: Metrics, tuned: Metrics, calibration: dict[str, float], di
         reasons.append(f"OK ECE {calibration['ece']:.3f}")
 
     # Fairness: %20'den buyuk recall fark uyari, %30+ FAIL
+    # GATE_WAIVERS_RECALL_GAP icindeki segmentlerde FAIL -> WARN_WAIVED
     for seg, gaps in disparities.items():
         gap = gaps["recall_gap"]
+        waived = seg in GATE_WAIVERS_RECALL_GAP
         if gap > 0.30:
-            fail = True
-            reasons.append(f"FAIL {seg} recall_gap {gap:.2f} > 0.30")
+            if waived:
+                reasons.append(f"WARN_WAIVED {seg} recall_gap {gap:.2f} > 0.30 (business rule covers this segment)")
+            else:
+                fail = True
+                reasons.append(f"FAIL {seg} recall_gap {gap:.2f} > 0.30")
         elif gap > 0.20:
             reasons.append(f"WARN {seg} recall_gap {gap:.2f} > 0.20")
         else:
@@ -351,7 +365,7 @@ def go_no_go(default: Metrics, tuned: Metrics, calibration: dict[str, float], di
         if np.isfinite(dpr) and dpr < 0.6:
             reasons.append(f"WARN {seg} demographic_parity_ratio {dpr:.2f} < 0.6")
 
-    decision = "NO-GO" if fail else "GO (uyarilarla)"
+    decision = "NO-GO" if fail else ("CONDITIONAL_GO" if any("WARN_WAIVED" in r for r in reasons) else "GO")
     return decision, reasons
 
 

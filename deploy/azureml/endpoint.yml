@@ -1,0 +1,11 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineEndpoint.schema.json
+name: bank-churn-${ENV_NAME}
+auth_mode: key
+description: |
+  bank-churn online inference endpoint (CONDITIONAL_GO v2-2026-04-28).
+  XGBoost + isotonic calibration, business rule overlay for <30 segment.
+tags:
+  project: bank-churn
+  owner: ${TEAM_OWNER_EMAIL}
+  decision: CONDITIONAL_GO
+  policy_version: v2-2026-04-28

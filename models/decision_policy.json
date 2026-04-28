@@ -1,0 +1,40 @@
+{
+  "version": "v2-2026-04-28",
+  "model_path": "models/best_model.joblib",
+  "preprocessor_path": "models/preprocessor.joblib",
+  "decision": "CONDITIONAL_GO",
+  "calibration": "isotonic",
+  "thresholds": {
+    "high_risk": 0.50,
+    "medium_risk": 0.10
+  },
+  "cost_assumption": {
+    "FN_COST": 5.0,
+    "FP_COST": 1.0,
+    "note": "FN cost x5: churn kacirmak yanlis alarmdan 5x pahali (varsayim, is ekibi onayi bekliyor)"
+  },
+  "segment_rules": {
+    "age_bucket": {
+      "<30": {
+        "action": "manual_review",
+        "reason": "v2 evaluation: recall=0.36, n=254 / pos=14 (%5.5). Veri seyrek; model skoru tek basina yetersiz.",
+        "supplementary_signals": ["app_login_30d", "callcenter_interactions_90d", "branch_visits_180d"]
+      }
+    }
+  },
+  "monitoring": {
+    "frequency": "monthly",
+    "metrics": ["recall_gap_per_segment", "ece", "score_drift", "selection_rate_drift"],
+    "alert_thresholds": {
+      "ece": 0.07,
+      "recall_gap_max": 0.25,
+      "psi_score_drift": 0.20
+    }
+  },
+  "actions": {
+    "high_risk": "automated_retention_campaign",
+    "medium_risk": "crm_priority_list",
+    "low_risk": "no_action"
+  },
+  "reapproval_required_in_days": 180
+}

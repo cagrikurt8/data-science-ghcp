@@ -1,0 +1,49 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+name: blue
+endpoint_name: bank-churn-${ENV_NAME}
+model:
+  name: bank-churn-model
+  version: ${MODEL_VERSION}
+  path: azureml://registries/${REGISTRY_NAME}/models/bank-churn-model/versions/${MODEL_VERSION}
+code_configuration:
+  code: ../../
+  scoring_script: scoring/score.py
+environment:
+  name: bank-churn-env
+  version: ${ENV_VERSION}
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04:latest
+  conda_file: ../conda.yml
+instance_type: Standard_DS3_v2
+instance_count: 2
+request_settings:
+  request_timeout_ms: 10000
+  max_concurrent_requests_per_instance: 4
+  max_queue_wait_ms: 2000
+liveness_probe:
+  initial_delay: 20
+  period: 30
+  timeout: 5
+  failure_threshold: 3
+readiness_probe:
+  initial_delay: 10
+  period: 10
+  timeout: 5
+  failure_threshold: 3
+scale_settings:
+  type: target_utilization
+  min_instances: 2
+  max_instances: 6
+  target_utilization_percentage: 70
+  polling_interval: 60
+data_collector:
+  collections:
+    model_inputs:
+      enabled: "true"
+    model_outputs:
+      enabled: "true"
+  rolling_rate: hour
+egress_public_network_access: disabled
+app_insights_enabled: true
+environment_variables:
+  LOG_LEVEL: INFO
+  POLICY_PATH: /var/azureml-app/azureml-models/bank-churn-model/${MODEL_VERSION}/decision_policy.json

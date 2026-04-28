@@ -20,6 +20,8 @@ import optuna
 import pandas as pd
 import xgboost as xgb
 from optuna.samplers import TPESampler
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.frozen import FrozenEstimator
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     average_precision_score,
@@ -45,6 +47,26 @@ class Datasets:
     y_val: pd.Series
     X_test: pd.DataFrame
     y_test: pd.Series
+    sample_weight_train: np.ndarray | None = None
+
+
+def _age_bucket(age: pd.Series) -> pd.Series:
+    return pd.cut(age, bins=[0, 30, 40, 50, 200], labels=["<30", "30-40", "40-50", "50+"], right=False).astype(str)
+
+
+def compute_fairness_weights(raw_train: pd.DataFrame) -> np.ndarray:
+    """age_bucket x Geography strata uzerinden inverse-frequency sample_weight.
+
+    v1 evaluation'da `<30` recall 0.14 ve Geography Fransa recall 0.67 idi.
+    Bu segmentleri agırlıklandırarak modeli dengelemeyi hedefliyoruz.
+    Agirliklar normalize edilir (ortalama 1).
+    """
+    strata = _age_bucket(raw_train["Age"]) + "|" + raw_train["Geography"].astype(str)
+    counts = strata.value_counts()
+    inv = 1.0 / counts
+    weights = strata.map(inv).to_numpy(dtype=float, copy=True)
+    weights = weights * (len(weights) / weights.sum())  # mean=1
+    return weights
 
 
 def load_splits(processed_dir: Path = PROCESSED_DIR) -> Datasets:
@@ -130,6 +152,7 @@ def _xgb_objective(trial: optuna.Trial, data: Datasets, scale_pos_weight: float)
         clf.fit(
             data.X_train,
             data.y_train,
+            sample_weight=data.sample_weight_train,
             eval_set=[(data.X_val, data.y_val)],
             verbose=False,
         )
@@ -177,16 +200,27 @@ def train_xgboost(data: Datasets, n_trials: int = N_TRIALS) -> tuple[xgb.XGBClas
         clf.fit(
             data.X_train,
             data.y_train,
+            sample_weight=data.sample_weight_train,
             eval_set=[(data.X_val, data.y_val)],
             verbose=False,
         )
-        val_metrics = compute_metrics(
+        val_metrics_raw = compute_metrics(
             data.y_val.to_numpy(), clf.predict_proba(data.X_val)[:, 1]
         )
-        mlflow.log_metrics({f"val_{k}": v for k, v in val_metrics.items()})
+        mlflow.log_metrics({f"val_raw_{k}": v for k, v in val_metrics_raw.items()})
         mlflow.log_metric("best_iteration", float(clf.best_iteration))
 
-    return clf, val_metrics, study.best_params
+        # Isotonic calibration on validation set with FrozenEstimator
+        # ModelEvaluator v1 ECE=0.189 -> hedef <0.05
+        calibrated = CalibratedClassifierCV(FrozenEstimator(clf), method="isotonic")
+        calibrated.fit(data.X_val, data.y_val)
+        val_metrics = compute_metrics(
+            data.y_val.to_numpy(), calibrated.predict_proba(data.X_val)[:, 1]
+        )
+        mlflow.log_metrics({f"val_{k}": v for k, v in val_metrics.items()})
+        mlflow.log_param("calibration", "isotonic_prefit")
+
+    return calibrated, val_metrics, study.best_params
 
 
 def evaluate_on_test(model: Any, data: Datasets, name: str) -> dict[str, float]:
@@ -207,6 +241,13 @@ def run(n_trials: int = N_TRIALS) -> dict[str, Any]:
     mlflow.set_experiment(EXPERIMENT_NAME)
 
     data = load_splits()
+
+    # Fairness sample weights from raw train split (age_bucket x Geography)
+    from src.features.pipeline import stratified_split, DROP_COLS as RAW_DROP
+    raw = pd.read_csv("data/raw/Churn_Modelling.csv")
+    raw = raw.drop(columns=[c for c in RAW_DROP if c in raw.columns])
+    raw_train, _, _ = stratified_split(raw)
+    data.sample_weight_train = compute_fairness_weights(raw_train)
 
     baseline_model, baseline_val = train_baseline(data)
     xgb_model, xgb_val, best_params = train_xgboost(data, n_trials=n_trials)
