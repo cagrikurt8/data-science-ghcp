@@ -1,6 +1,6 @@
 ---
 description: "Metrik, hata analizi, açıklanabilirlik, fairness"
-tools: ["search/codebase", "edit/editFiles", "execute/runNotebookCell", "read/getNotebookSummary", "read/readNotebookCellOutput"]
+tools: ["search/codebase", "edit/editFiles", "execute/runNotebookCell", "read/getNotebookSummary", "read/readNotebookCellOutput", "execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection"]
 model: "Claude Opus 4.7"
 ---
 Sen bir **Model Evaluator** agent'ısın. `models/best_model.joblib` ve `data/processed/test.parquet` üzerinde:

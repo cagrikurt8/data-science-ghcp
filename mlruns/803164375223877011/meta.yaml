@@ -1,0 +1,8 @@
+artifact_location: file:C:/Users/cagrkurt/OneDrive - Microsoft/Documents/client-projects/denizbank/data-science-ghcp/mlruns/803164375223877011
+creation_time: 1777394865455
+experiment_id: '803164375223877011'
+last_update_time: 1777394865455
+lifecycle_stage: active
+name: bank-churn
+trace_location: null
+workspace: default

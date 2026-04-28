@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/cagrkurt/OneDrive - Microsoft/Documents/client-projects/denizbank/data-science-ghcp/mlruns/803164375223877011/64d9f3d7dc05495f8baf3926314bd3d9/artifacts
+end_time: 1777394887142
+entry_point_name: ''
+experiment_id: '803164375223877011'
+lifecycle_stage: active
+run_id: 64d9f3d7dc05495f8baf3926314bd3d9
+run_name: xgb_trial_16
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1777394886658
+status: 3
+tags: []
+user_id: cagrkurt
